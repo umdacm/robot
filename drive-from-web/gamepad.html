@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <script src="https://cdn.rawgit.com/neogeek/gamepad.js/master/gamepad.js"></script>
+    <script>
+      // set up gamepad
+      const gamepad = new Gamepad();
+
+      // Create WebSocket connection.
+      const ws = new WebSocket('ws://localhost:8080');
+
+      ['d_pad_left', 'd_pad_right', 'd_pad_up', 'd_pad_down'].forEach(function(button) {
+        gamepad.on('press', button, () => {
+          ws.send(button + ' pressed');
+        });
+        gamepad.on('release', button, () => {
+          ws.send(button + ' released');
+        });
+      });
+
+      ['stick_axis_left'/*, 'stick_axis_right'*/].forEach(function(joystick) {
+        gamepad.on('hold', joystick, e => {
+          ws.send(joystick + ' ' + e.value);
+        });
+      });
+
+
+      // // Connection opened
+      // ws.addEventListener('open', function (event) {
+      //     ws.send('Hello Server!');
+      // });
+
+      // Alert on message from server
+      ws.addEventListener('message', function (event) {
+          console.log('Message from server ', event.data);
+      });
+
+      window.addEventListener("gamepadconnected", function(e) {
+        var gp = navigator.getGamepads()[e.gamepad.index];
+        console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+          gp.index, gp.id,
+          gp.buttons.length, gp.axes.length);
+      });
+      // setInterval(function(){
+      //   document.getElementById("debug").innerHTML = JSON.stringify(navigator.getGamepads()[0]["axes"]) + ", " + 
+      //       navigator.getGamepads()[0]["buttons"][6]["value"] + ", " + 
+      //       navigator.getGamepads()[0]["buttons"][7]["value"];
+      // }, 100);
+      setInterval(function(){
+        document.getElementById("left-x").innerHTML = navigator.getGamepads()[0]["axes"][0];
+        document.getElementById("left-y").innerHTML = navigator.getGamepads()[0]["axes"][1] * -1;
+        document.getElementById("right-x").innerHTML = navigator.getGamepads()[0]["buttons"][6]["value"] * 2 - 1;
+        document.getElementById("right-y").innerHTML = navigator.getGamepads()[0]["buttons"][7]["value"] * -2 + 1;
+        
+      }, 100);
+    </script>
+    <title>Gamepad Test</title>
+  </head>
+  <body>
+    <h1>Gamepad Test</h1>
+    <p>
+      This is tested to work in Chrome 64.0.3282.186 for Linux, and tested not
+      working in Firefox 60.0 for Linux, both using a PS4 controller connected
+      via Bluetooth.
+    </p>
+    <h3>Left Stick</h3>
+    <p><b>X:</b> <span id="left-x"></span></p>
+    <p><b>Y:</b> <span id="left-y"></span></p>
+    <h3>Right Stick</h3>
+    <p><b>X:</b> <span id="right-x"></span></p>
+    <p><b>Y:</b> <span id="right-y"></span></p>
+    <!-- <h3>Debug</h3>
+    <p id="debug"></p> -->
+  </body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Built-in Camera</title>
+  </head>
+  <body>
+    <img src="http://localhost:8999/image" id="cam-img"/>
+    <script>
+      let camimg = document.getElementById("cam-img");
+      setInterval(function(){
+        camimg.src = "http://localhost:8999/image#" + new Date().getTime();
+      }, 500);
+    </script>
+  </body>
+</html>
