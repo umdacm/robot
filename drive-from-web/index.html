@@ -10,10 +10,17 @@
 
       // Listen for messages
       socket.addEventListener('message', function (event) {
-          alert(event.data);
+        if (event.data != "okay")
+          alert(event.data());
       });
 
       // TODO: auto-reconnect on connection close (e.g. server restart)
+
+      let x_coord = 0;
+      let y_coord = 0;
+      function updateCamera() {
+        socket.send(`CAM ${x_coord} ${y_coord}`);
+      }
     </script>
   </head>
   <body>
@@ -21,6 +28,13 @@
     Say something:
     <input id="text-to-say" type="text">
     <button onclick="t=document.getElementById('text-to-say'); socket.send('SAY '+t.value); t.value=''">Speak</button>
+    <br />
+    <button onclick="x_coord=Math.max(x_coord-0.1, -1.0);updateCamera()">Left</button>
+    <button onclick="x_coord=Math.min(x_coord+0.1, 1.0);updateCamera()">Right</button>
+    <button onclick="y_coord=Math.max(y_coord-0.1, -1.0);updateCamera()">Down</button>
+    <button onclick="y_coord=Math.min(y_coord+0.1, 1.0);updateCamera()">Up</button>
+    <button onclick="socket.send(`CAM ${prompt('enter custom coords in the form \'0.5 0.75\'')}`)">Custom Coords</button>
+    
     <br />
     <img src="/camera/cam_pic_new.php">
   </body>

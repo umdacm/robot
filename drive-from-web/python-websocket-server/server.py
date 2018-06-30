@@ -13,6 +13,7 @@ def on_msg(client, server, message):
         x = coords[0] * 875
         y = coords[1] * 295
         call(['ssh', 'mobility@10.0.0.2', './visca_cli -d /dev/ttyS2 set_pantilt_absolute_position 16 16 %i %i' % (x, y)])
+        server.send_message(client, "okay")
     else:
         server.send_message(client, "unknown command")
 
