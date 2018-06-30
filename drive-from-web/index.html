@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title>ACM Robot Web Control Panel</title>
+    <script>
+      // Create WebSocket connection.
+      const socket = new WebSocket('ws://robot.net.chandlerswift.com:10000');
+
+      // Listen for messages
+      socket.addEventListener('message', function (event) {
+          alert(event.data);
+      });
+
+      // TODO: auto-reconnect on connection close (e.g. server restart)
+    </script>
+  </head>
+  <body>
+    <h1>ACM Robot Web Control Panel</h1>
+    Say something:
+    <input id="text-to-say" type="text">
+    <button onclick="t=document.getElementById('text-to-say'); socket.send('SAY '+t.value); t.value=''">Speak</button>
+    <br />
+    <img src="/camera/cam_pic_new.php">
+  </body>
+</html>
+
