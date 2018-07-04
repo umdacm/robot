@@ -1,9 +1,16 @@
+// socket includes
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+// camera includes
+#include "../visca/libvisca.h"
+#include <fcntl.h> /* File control definitions */
+#include <errno.h> /* Error number definitions */
+
+
 #define PORT 10000
 int main(int argc, char const *argv[])
 {
@@ -13,42 +20,58 @@ int main(int argc, char const *argv[])
     int addrlen = sizeof(address);
     char buffer[1024] = {0};
     int count = 0;
-    float x,y;
+    int x,y;
 
+    // SET UP SOCKET
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
-    {
-        perror("socket failed");
-        exit(EXIT_FAILURE);
-    }
-
+        exit(1);
     // Forcefully attaching socket to the port 8080
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-                   &opt, sizeof(opt)))
-    {
-        perror("setsockopt");
-        exit(EXIT_FAILURE);
-    }
+                &opt, sizeof(opt)))
+        exit(2);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
-
     // Forcefully attaching socket to the port 8080
     if (bind(server_fd, (struct sockaddr *)&address,
-             sizeof(address)) < 0)
-    {
-        perror("bind failed");
-        exit(EXIT_FAILURE);
-    }
+                sizeof(address)) < 0)
+        exit(3);
     if (listen(server_fd, 3) < 0)
+        exit(4);
+
+    // SET UP CAMERA
+    VISCAInterface_t iface;
+    VISCACamera_t camera;
+
+
+    int camera_num;
+    uint8_t value;
+    uint16_t zoom;
+    int pan_pos, tilt_pos;
+
+
+    if (VISCA_open_serial(&iface, '/dev/ttyS2')!=VISCA_SUCCESS)
     {
-        perror("listen");
-        exit(EXIT_FAILURE);
+        fprintf(stderr,"%s: unable to open serial device %s\n",argv[0],argv[1]);
+        exit(5);
     }
+
+    iface.broadcast=0;
+    VISCA_set_address(&iface, &camera_num);
+    camera.address=1;
+    VISCA_clear(&iface, &camera);
+
+    VISCA_get_camera_info(&iface, &camera);
+    fprintf(stderr,"Some camera info:\n------------------\n");
+    fprintf(stderr,"vendor: 0x%04x\n model: 0x%04x\n ROM version: 0x%04x\n socket number: 0x%02x\n",
+            camera.vendor, camera.model, camera.rom_version, camera.socket_num);
+
+    // Handling loop
     for (;;)
     {
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address,
-                                 (socklen_t *)&addrlen)) < 0)
+                        (socklen_t *)&addrlen)) < 0)
         {
             perror("accept");
             exit(EXIT_FAILURE);
@@ -59,9 +82,16 @@ int main(int argc, char const *argv[])
             // CMD 0.00 1.00\0
             // 01234567890123
             if (strncmp(buffer, "CAM ", 4) == 0) {
-                x = atof(buffer+4);
-                y = atof(buffer+9);
+                x = (int)(atof(buffer+4) * 24); // TODO: bounds checking?
+                y = (int)(atof(buffer+9) * 20);
                 printf("Moving camera to (%f, %f).\n", x, y);
+                if (VISCA_set_pantilt_left(&iface, &camera, intarg1, intarg2)
+                        == VISCA_SUCCESS)
+                    printf("Camera moved.\n");
+                else
+                    printf("Camera command failed.\n");
+            } else {
+                printf("Unknown command: %s", buffer);
             }
 
             printf("%i: %s\n", count++, buffer);
