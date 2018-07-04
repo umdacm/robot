@@ -5,16 +5,12 @@ from websocket_server import WebsocketServer
 from subprocess import call
 import socket
 
-#HOST = '192.168.1.125'
-#PORT = 8080
-#s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#s.connect((HOST, PORT))
-#s.sendall(b'Hello, world')
-#data = s.recv(1024)
-#print('Received', repr(data))
+import socket
 
-
-#quit()
+HOST = '10.0.0.2'
+PORT = 10000
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, PORT))
 
 def on_msg(client, server, message):
     print(message + "...", end="")
@@ -27,8 +23,14 @@ def on_msg(client, server, message):
         coords = map(lambda x: min(1, max(-1, float(x))), params.split())
         x = coords[0] * 875
         y = coords[1] * 295
-        call(['ssh', 'mobility@10.0.0.2', './visca_cli -d /dev/ttyS2 set_pantilt_absolute_position 16 16 %i %i' % (x, y)])
-        server.send_message(client, "okay")
+        s.sendall(str.encode(
+            "CAM %.2f %.2f" % coords
+        ))
+        data = s.recv(1023)
+        print('Received ' + str(data))
+
+        # call(['ssh', 'mobility@10.0.0.2', './visca_cli -d /dev/ttyS2 set_pantilt_absolute_position 16 16 %i %i' % (x, y)])
+        # server.send_message(client, "okay")
     else:
         server.send_message(client, "unknown command")
     print('complete!')
