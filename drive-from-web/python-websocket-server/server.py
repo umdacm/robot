@@ -5,12 +5,11 @@ from websocket_server import WebsocketServer
 from subprocess import call
 import socket
 
-import socket
-
 HOST = '10.0.0.2'
 PORT = 10000
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
+s.sendall(str.encode('Initializing connection'))
 
 def on_msg(client, server, message):
     print(message + "...", end="")
@@ -21,10 +20,10 @@ def on_msg(client, server, message):
         server.send_message(client, "okay")
     elif cmd == "cam ":
         coords = map(lambda x: min(1, max(-1, float(x))), params.split())
-        x = coords[0] * 875
-        y = coords[1] * 295
+        #x = coords[0] * 875
+        #y = coords[1] * 295
         s.sendall(str.encode(
-            "CAM %.2f %.2f" % coords
+            "CAM %.2f %.2f" % (coords[0], coords[1])
         ))
         data = s.recv(1023)
         print('Received ' + str(data))
@@ -38,3 +37,4 @@ def on_msg(client, server, message):
 server = WebsocketServer(10000, host='0.0.0.0', loglevel=logging.INFO)
 server.set_fn_message_received(on_msg)
 server.run_forever()
+
