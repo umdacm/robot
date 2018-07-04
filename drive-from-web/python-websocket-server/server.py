@@ -1,8 +1,23 @@
+#!/user/bin/env python
+from __future__ import print_function
 import logging
 from websocket_server import WebsocketServer
 from subprocess import call
+import socket
+
+#HOST = '192.168.1.125'
+#PORT = 8080
+#s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#s.connect((HOST, PORT))
+#s.sendall(b'Hello, world')
+#data = s.recv(1024)
+#print('Received', repr(data))
+
+
+#quit()
 
 def on_msg(client, server, message):
+    print(message + "...", end="")
     cmd = message[0:4].lower()
     params = message[4:]
     if cmd == "say ":
@@ -16,6 +31,7 @@ def on_msg(client, server, message):
         server.send_message(client, "okay")
     else:
         server.send_message(client, "unknown command")
+    print('complete!')
 
 server = WebsocketServer(10000, host='0.0.0.0', loglevel=logging.INFO)
 server.set_fn_message_received(on_msg)
