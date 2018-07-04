@@ -22,12 +22,19 @@ int main(int argc, char const *argv[])
     int count = 0;
     int x,y;
 
+    VISCAInterface_t iface;
+    VISCACamera_t camera;
+    int camera_num;
+    uint8_t value;
+    uint16_t zoom;
+    int pan_pos, tilt_pos;
+
     // SET UP SOCKET
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
         exit(1);
     // Forcefully attaching socket to the port 8080
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR,
                 &opt, sizeof(opt)))
         exit(2);
     address.sin_family = AF_INET;
@@ -41,17 +48,8 @@ int main(int argc, char const *argv[])
         exit(4);
 
     // SET UP CAMERA
-    VISCAInterface_t iface;
-    VISCACamera_t camera;
 
-
-    int camera_num;
-    uint8_t value;
-    uint16_t zoom;
-    int pan_pos, tilt_pos;
-
-
-    if (VISCA_open_serial(&iface, '/dev/ttyS2')!=VISCA_SUCCESS)
+    if (VISCA_open_serial(&iface, "/dev/ttyS2")!=VISCA_SUCCESS)
     {
         fprintf(stderr,"%s: unable to open serial device %s\n",argv[0],argv[1]);
         exit(5);
@@ -82,14 +80,22 @@ int main(int argc, char const *argv[])
             // CMD 0.00 1.00\0
             // 01234567890123
             if (strncmp(buffer, "CAM ", 4) == 0) {
-                x = (int)(atof(buffer+4) * 24); // TODO: bounds checking?
-                y = (int)(atof(buffer+9) * 20);
-                printf("Moving camera to (%f, %f).\n", x, y);
-                if (VISCA_set_pantilt_left(&iface, &camera, intarg1, intarg2)
-                        == VISCA_SUCCESS)
-                    printf("Camera moved.\n");
-                else
-                    printf("Camera command failed.\n");
+                x = (int)(atof(buffer+4) * 24.0); // TODO: bounds checking?
+                y = (int)(atof(buffer+9) * 20.0);
+                printf("Moving camera to (%i, %i).\n", x, y);
+                if (x > 0) {
+                    if (y > 0) {
+                        VISCA_set_pantilt_upright(&iface, &camera, x, y);
+                    } else {
+                        VISCA_set_pantilt_downright(&iface, &camera, x, -y);
+                    }
+                } else {
+                    if (y > 0) {
+                        VISCA_set_pantilt_upleft(&iface, &camera, -x, y);
+                    } else {
+                        VISCA_set_pantilt_downleft(&iface, &camera, -x, -y);
+                    }
+                }
             } else {
                 printf("Unknown command: %s", buffer);
             }
@@ -98,7 +104,9 @@ int main(int argc, char const *argv[])
             memset(buffer, 0, sizeof(buffer)); // reset buffer (could also null terminate after read, potentially? TODO)
             send(new_socket, "OK", 2, 0); // Don't send null termination, messes with receiving script
         }
+
         printf("connection closed\n");
     }
+
     return 0;
 }
