@@ -1,3 +1,15 @@
+// rotate-test
+// Chandler Swift <chandler@chandlerswift.com>, June 2018
+
+// These includes pull in interface definitions and utilities.
+#include "mobilitycomponents_i.h"
+#include "mobilitydata_i.h"
+#include "mobilitygeometry_i.h"
+#include "mobilityactuator_i.h"
+#include "mobilityutil.h"
+#include "userlib.h"
+#include <iostream.h>
+
 // socket includes
 #include <unistd.h>
 #include <stdio.h>
@@ -5,13 +17,10 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
-// camera includes
-#include "../visca/libvisca.h"
-#include <fcntl.h> /* File control definitions */
-#include <errno.h> /* Error number definitions */
 
 
-#define PORT 10000
+
+#define PORT 10001
 int main(int argc, char const *argv[])
 {
     int server_fd, new_socket;
@@ -21,13 +30,6 @@ int main(int argc, char const *argv[])
     char buffer[1024] = {0};
     int count = 0;
     int x,y;
-
-    VISCAInterface_t iface;
-    VISCACamera_t camera;
-    int camera_num;
-    uint8_t value;
-    uint16_t zoom;
-    int pan_pos, tilt_pos;
 
     // SET UP SOCKET
     // Creating socket file descriptor
@@ -47,24 +49,63 @@ int main(int argc, char const *argv[])
     if (listen(server_fd, 3) < 0)
         exit(4);
 
-    // SET UP CAMERA
+    // SET UP DRIVE
 
-    if (VISCA_open_serial(&iface, "/dev/ttyS2")!=VISCA_SUCCESS)
+    // This framework class simplifies setup and initialization for
+    // client-only programs like this one.p
+    //
+    mbyClientHelper *pHelper;
+
+    // This is a generic pointer that can point to any CORBA object
+    // within Mobility.
+    CORBA::Object_ptr ptempObj;
+
+    // This is a smart pointer to an object descriptor. Automacially
+    // manages memory.
+    // The XXX_var classes automaticall release references for
+    // hassle-free memory management.
+    MobilityCore::ObjectDescriptor_var pDescriptor;
+
+    // This is a buffer for object names.
+    char pathName[255];
+
+    // Holds -robot command line option.
+    char *robotName = "MagellanPro";
+
+    // All Mobility servers and clients use CORBA and this initialization
+    // is required for the C++ language mapping of CORBA.
+    pHelper = new mbyClientHelper(argc, argv);
+
+    // Build a pathname to the component we want to use to get sensor data.
+    sprintf(pathName, "%s/Sonar/Segment", robotName); // Use robot name arg.
+
+    // Locate the component we want.
+    ptempObj = pHelper->find_object(pathName);
+
+    // Build pathname to the component we want to use to drive the robot.
+    sprintf(pathName, "%s/Drive/Command", robotName); // Use robot name arg.
+
+    // Locate object within robot.
+    ptempObj = pHelper->find_object(pathName);
+
+    // Find the drive command (we're going to drive the robot around).
+    // The XX_var is a smart pointer for memory management.
+    MobilityActuator::ActuatorState_var pDriveCommand;
+    MobilityActuator::ActuatorData OurCommand;
+
+    // We'll send two axes of command. Axis[0] == translate, Axis[1] == rotate.
+    OurCommand.velocity.length(2);
+
+    // Request the interface we need from the object we found.
+    try
     {
-        fprintf(stderr,"%s: unable to open serial device %s\n",argv[0],argv[1]);
-        exit(5);
+        pDriveCommand = MobilityActuator::ActuatorState::_duplicate(
+            MobilityActuator::ActuatorState::_narrow(ptempObj));
+    } catch (...) {
+        return -1;
     }
 
-    iface.broadcast=0;
-    VISCA_set_address(&iface, &camera_num);
-    camera.address=1;
-    VISCA_clear(&iface, &camera);
-
-    VISCA_get_camera_info(&iface, &camera);
-    fprintf(stderr,"Some camera info:\n------------------\n");
-    fprintf(stderr,"vendor: 0x%04x\n model: 0x%04x\n ROM version: 0x%04x\n socket number: 0x%02x\n",
-            camera.vendor, camera.model, camera.rom_version, camera.socket_num);
-
+    return 0;
     // Handling loop
     for (;;)
     {
@@ -79,23 +120,12 @@ int main(int argc, char const *argv[])
         while (read(new_socket, buffer, 1024)) {
             // CMD 0.00 1.00\0
             // 01234567890123
-            if (strncmp(buffer, "CAM ", 4) == 0) {
-                x = (int)(atof(buffer+4) * 24.0); // TODO: bounds checking?
-                y = (int)(atof(buffer+9) * 20.0);
-                printf("Moving camera to (%i, %i).\n", x, y);
-                if (x > 0) {
-                    if (y > 0) {
-                        VISCA_set_pantilt_upright(&iface, &camera, x, y);
-                    } else {
-                        VISCA_set_pantilt_downright(&iface, &camera, x, -y);
-                    }
-                } else {
-                    if (y > 0) {
-                        VISCA_set_pantilt_upleft(&iface, &camera, -x, y);
-                    } else {
-                        VISCA_set_pantilt_downleft(&iface, &camera, -x, -y);
-                    }
-                }
+            if (strncmp(buffer, "DRV ", 4) == 0) {
+                // TODO: Bounds Checking?
+                OurCommand.velocity[0] = atof(buffer+4);
+                OurCommand.velocity[1] = atof(buffer+9);
+
+                pDriveCommand->new_sample(OurCommand, 0);
             } else {
                 printf("Unknown command: %s", buffer);
             }

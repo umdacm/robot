@@ -7,9 +7,13 @@ import socket
 
 HOST = '10.0.0.2'
 PORT = 10000
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
-s.sendall(str.encode('Initializing connection'))
+s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s1.connect((HOST, PORT))
+s1.sendall(str.encode('Initializing connection'))
+
+s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s2.connect((HOST, 10001))
+s2.sendall(str.encode('Initializing connection'))
 
 def on_msg(client, server, message):
     print(message + "...", end="")
@@ -22,11 +26,19 @@ def on_msg(client, server, message):
         coords = map(lambda x: min(1, max(-1, float(x))), params.split())
         #x = coords[0] * 875
         #y = coords[1] * 295
-        s.sendall(str.encode(
+        s1.sendall(str.encode(
             "CAM %.2f %.2f" % (coords[0], coords[1])
         ))
-        data = s.recv(1023)
+        data = s1.recv(1023)
         print('Received ' + str(data))
+    elif cmd == "drv ":
+        coords = map(lambda x: min(1, max(-1, float(x))), params.split())
+        s2.sendall(str.encode(
+            "DRV %.2f %.2f" % (coords[0], coords[1])
+        ))
+        data = s2.recv(1023)
+        print('Received ' + str(data))
+
 
         # call(['ssh', 'mobility@10.0.0.2', './visca_cli -d /dev/ttyS2 set_pantilt_absolute_position 16 16 %i %i' % (x, y)])
         # server.send_message(client, "okay")

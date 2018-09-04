@@ -10,7 +10,7 @@
       let x, y;
 
       // Create WebSocket connection.
-      const ws = new WebSocket('ws://192.168.1.100:10000');
+      const ws = new WebSocket('ws://robot.net.chandlerswift.com:10000');
 
       ['d_pad_left', 'd_pad_right', 'd_pad_up', 'd_pad_down'].forEach(function(button) {
         gamepad.on('press', button, () => {
@@ -27,15 +27,16 @@
 
         stick[0][0] = navigator.getGamepads()[0]["axes"][0];
         stick[0][1] = navigator.getGamepads()[0]["axes"][1] * -1;
-        stick[1][0] = navigator.getGamepads()[0]["buttons"][6]["value"] * 2 - 1;
-        stick[1][1] = navigator.getGamepads()[0]["buttons"][7]["value"] * -2 + 1;
+        stick[1][0] = navigator.getGamepads()[0]["axes"][2];
+        stick[1][1] = navigator.getGamepads()[0]["axes"][3] * -1;
 
         document.getElementById("left-x").innerHTML = stick[0][0];
         document.getElementById("left-y").innerHTML = stick[0][1];
         document.getElementById("right-x").innerHTML = stick[1][0];
         document.getElementById("right-y").innerHTML = stick[1][1];
         
-        ws.send(`CAM ${stick[0][0]} ${stick[0][1]}`);
+        ws.send(`DRV ${stick[0][0]} ${stick[0][1]}`);
+        ws.send(`CAM ${stick[1][0]} ${stick[1][1]}`);
       }, 100);
     </script>
     <title>Gamepad Test</title>
@@ -57,3 +58,4 @@
     <p id="debug"></p> -->
   </body>
 </html>
+
