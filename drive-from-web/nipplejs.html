@@ -40,23 +40,23 @@
         // stick[1][1] = navigator.getGamepads()[0]["axes"][3] * -1;
 
         if (leftStick[0]) {
-          document.getElementById("left-x").innerHTML = leftStick[0].frontPosition.x - leftStick[0].position.x;
-          document.getElementById("left-y").innerHTML = leftStick[0].frontPosition.y - leftStick[0].position.y;
+          document.getElementById("left-x").innerHTML = leftStick[0].frontPosition.x/50;
+          document.getElementById("left-y").innerHTML = -leftStick[0].frontPosition.y/50;
         } else {
           document.getElementById("left-x").innerHTML = "";
           document.getElementById("left-y").innerHTML = "";
         }
 
         if (rightStick[0]) {
-          document.getElementById("right-x").innerHTML = rightStick[0].frontPosition.x - rightStick[0].position.x;
-          document.getElementById("right-y").innerHTML = rightStick[0].frontPosition.y - rightStick[0].position.y;
+          document.getElementById("right-x").innerHTML = rightStick[0].frontPosition.x/50;
+          document.getElementById("right-y").innerHTML = -rightStick[0].frontPosition.y/50;
         } else {
           document.getElementById("right-x").innerHTML = "";
           document.getElementById("right-y").innerHTML = "";
         }
         
-        // ws.send(`DRV ${stick[0][0]} ${stick[0][1]}`);
-        // ws.send(`CAM ${stick[1][0]} ${stick[1][1]}`);
+        // ws.send(`DRV ${leftStick[0].frontPosition.x/50}  ${-leftStick[0].frontPosition.y/50}`);
+        ws.send(`CAM ${rightStick[0].frontPosition.x/50} ${-rightStick[0].frontPosition.y/50}`);
       }, 100);
     </script>
   </body>
