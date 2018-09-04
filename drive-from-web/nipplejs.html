@@ -42,21 +42,24 @@
         if (leftStick[0]) {
           document.getElementById("left-x").innerHTML = leftStick[0].frontPosition.x/50;
           document.getElementById("left-y").innerHTML = -leftStick[0].frontPosition.y/50;
+          // ws.send(`DRV ${leftStick[0].frontPosition.x/50}  ${-leftStick[0].frontPosition.y/50}`);
         } else {
           document.getElementById("left-x").innerHTML = "";
           document.getElementById("left-y").innerHTML = "";
+          // ws.send(`DRV 0 0`);
+
         }
 
         if (rightStick[0]) {
           document.getElementById("right-x").innerHTML = rightStick[0].frontPosition.x/50;
           document.getElementById("right-y").innerHTML = -rightStick[0].frontPosition.y/50;
+          ws.send(`CAM ${rightStick[0].frontPosition.x/50} ${-rightStick[0].frontPosition.y/50}`);
         } else {
           document.getElementById("right-x").innerHTML = "";
           document.getElementById("right-y").innerHTML = "";
+          ws.send(`CAM 0 0`);
         }
         
-        // ws.send(`DRV ${leftStick[0].frontPosition.x/50}  ${-leftStick[0].frontPosition.y/50}`);
-        ws.send(`CAM ${rightStick[0].frontPosition.x/50} ${-rightStick[0].frontPosition.y/50}`);
       }, 100);
     </script>
   </body>
