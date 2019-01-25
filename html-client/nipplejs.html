@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <script src="https://rawgit.com/yoannmoinet/nipplejs/v0.6.8/dist/nipplejs.min.js"></script>
+    <title>Nipple.js Test</title>
+  </head>
+  <body style="margin:0;">
+    <img style="position:absolute;height:100%;left:0;right:0;margin:auto;" src="http://robot.net.chandlerswift.com/camera/cam_pic_new.php">
+    <div id="left-joystick-container" style="position:absolute;height:100%;width:50%;top:0;left:0"></div>
+    <div id="right-joystick-container" style="position:absolute;height:100%;width:50%;top:0;left:50%"></div>
+    <script>
+      // Create WebSocket connection.
+      const ws = new WebSocket('ws://robot.net.chandlerswift.com:10000');
+
+      var leftStick = nipplejs.create({
+        zone: document.getElementById('left-joystick-container'),
+        color: "red",
+      });
+
+      var rightStick = nipplejs.create({
+        zone: document.getElementById('right-joystick-container'),
+        color: "red",
+      });
+
+      setInterval(function(){
+
+        if (leftStick[0])
+          ws.send(`DRV ${leftStick[0].frontPosition.x/50}  ${-leftStick[0].frontPosition.y/50}`);
+        else
+          ws.send(`DRV 0 0`);
+
+        if (rightStick[0])
+          ws.send(`CAM ${rightStick[0].frontPosition.x/50} ${-rightStick[0].frontPosition.y/50}`);
+        else
+          ws.send(`CAM 0 0`);
+
+      }, 100);
+    </script>
+  </body>
+</html>
+
+
