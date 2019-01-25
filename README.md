@@ -1,8 +1,25 @@
 # ACM Robot
 
-### Docs
+### History
+About 2000: Purchased by the University of Minnesota Duluth CS Department
+for use in a grad student project.
 
-### Connecting
-The robot expects an IP address of <TODO>.
+About 2001: Project completed/abandoned, robot stuck in hardware closet.
+
+Spring 2018: Robot found and offered to ACM club as a project
+
+Summer 2018: Robot brought back to serviceable condition, basic web client
+added to drive and view from added HD Raspberry Pi Camera.
+
+Spring 2019: Jeff Smith UROP: Autonomous Driving
+
+Spring 2019: Chandler Swift UROP: Reliable control over unreliable wireless
+
+### Docs
+Documentation is in the `[docs](/docs)` folder:
+ * [Connecting to the robot](/docs/access.md)
+ * [Using the camera](/docs/camera.md)
 
 ### Resources
+Resources are in the `[resources](/resources)` folder, and include all of the
+original documentation for the robot.
