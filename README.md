@@ -16,10 +16,10 @@ Spring 2019: Jeff Smith UROP: Autonomous Driving
 Spring 2019: Chandler Swift UROP: Reliable control over unreliable wireless
 
 ### Docs
-Documentation is in the `[docs](/docs)` folder:
+Documentation is in the [`docs`](/docs) folder:
  * [Connecting to the robot](/docs/access.md)
  * [Using the camera](/docs/camera.md)
 
 ### Resources
-Resources are in the `[resources](/resources)` folder, and include all of the
+Resources are in the [`resources`](/resources) folder, and include all of the
 original documentation for the robot.
