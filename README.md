@@ -11,9 +11,9 @@ Spring 2018: Robot found and offered to ACM club as a project
 Summer 2018: Robot brought back to serviceable condition, basic web client
 added to drive and view from added HD Raspberry Pi Camera.
 
-Spring 2019: Jeff Smith UROP: Autonomous Driving
+Spring 2019: Jeff Smith UROP: Autonomous Driving ([Simulator Source](https://github.com/smit8397/robotsimulation))
 
-Spring 2019: Chandler Swift UROP: Reliable control over unreliable wireless
+Spring/Fall 2019: Chandler Swift UROP: Reliable control over unreliable wireless
 
 ### Docs
 Documentation is in the [`docs`](/docs) folder:
