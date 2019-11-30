@@ -11,6 +11,8 @@
     <div id="left-joystick-container" style="position:absolute;height:100%;width:50%;top:0;left:0"></div>
     <div id="right-joystick-container" style="position:absolute;height:100%;width:50%;top:0;left:50%"></div>
     <script>
+      alert("This probably needs to be run over HTTP, not HTTPS, as we don't " +
+            "encrypt our websocket connections. Make sure your clock is synchronized.");
       // Create WebSocket connection.
       const ws = new WebSocket('ws://robot.net.chandlerswift.com:10000');
 
