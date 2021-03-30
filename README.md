@@ -13,7 +13,7 @@ added to drive and view from added HD Raspberry Pi Camera.
 
 Spring 2019: Jeff Smith UROP: Autonomous Driving ([Simulator Source](https://github.com/smit8397/robotsimulation))
 
-Spring/Fall 2019: Chandler Swift UROP: Reliable control over unreliable wireless ([website](https://duluth.chandlerswift.com/robot/))
+Spring/Fall 2019: Chandler Swift UROP: Reliable control over unreliable wireless ([website](https://home.chandlerswift.com/robot/))
 
 ### Docs
 Documentation is in the [`docs`](/docs) folder:
